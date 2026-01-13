@@ -1,0 +1,193 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* BMKG Dryness Indicator - Design System
+   Professional, data-focused meteorological UI */
+
+@layer base {
+  :root {
+    /* Core backgrounds */
+    --background: 210 25% 97%;
+    --foreground: 215 25% 15%;
+
+    /* Card surfaces */
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 15%;
+
+    /* Primary: Deep teal/blue for meteorological theme */
+    --primary: 200 85% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary: Soft blue-gray */
+    --secondary: 210 20% 92%;
+    --secondary-foreground: 215 25% 25%;
+
+    /* Muted surfaces */
+    --muted: 210 15% 94%;
+    --muted-foreground: 215 15% 45%;
+
+    /* Accent: Warm amber for highlights */
+    --accent: 38 92% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Status colors for indicators */
+    --success: 150 60% 40%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --danger: 0 70% 55%;
+    --danger-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 210 20% 88%;
+    --input: 210 20% 88%;
+    --ring: 200 85% 35%;
+
+    --radius: 0.5rem;
+
+    /* Map indicator colors */
+    --indicator-high: 0 70% 55%;
+    --indicator-low: 150 60% 40%;
+    --indicator-neutral: 210 15% 70%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 215 30% 10%;
+    --foreground: 210 20% 95%;
+
+    --card: 215 25% 14%;
+    --card-foreground: 210 20% 95%;
+
+    --popover: 215 25% 14%;
+    --popover-foreground: 210 20% 95%;
+
+    --primary: 200 80% 50%;
+    --primary-foreground: 215 30% 10%;
+
+    --secondary: 215 20% 20%;
+    --secondary-foreground: 210 20% 90%;
+
+    --muted: 215 20% 18%;
+    --muted-foreground: 210 15% 60%;
+
+    --accent: 38 92% 55%;
+    --accent-foreground: 215 30% 10%;
+
+    --success: 150 55% 45%;
+    --success-foreground: 215 30% 10%;
+    --warning: 38 85% 55%;
+    --warning-foreground: 215 30% 10%;
+    --danger: 0 65% 55%;
+    --danger-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 215 20% 22%;
+    --input: 215 20% 22%;
+    --ring: 200 80% 50%;
+
+    --indicator-high: 0 65% 55%;
+    --indicator-low: 150 55% 45%;
+    --indicator-neutral: 215 15% 40%;
+
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  .data-card {
+    @apply bg-card rounded-lg border border-border shadow-sm p-6;
+  }
+
+  .data-table {
+    @apply w-full text-sm;
+  }
+
+  .data-table th {
+    @apply bg-muted px-4 py-3 text-left font-semibold text-muted-foreground uppercase text-xs tracking-wider;
+  }
+
+  .data-table td {
+    @apply px-4 py-3 border-b border-border;
+  }
+
+  .data-table tr:hover td {
+    @apply bg-muted/50;
+  }
+
+  .indicator-badge {
+    @apply inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .indicator-badge--high {
+    @apply bg-danger text-danger-foreground;
+  }
+
+  .indicator-badge--low {
+    @apply bg-success text-success-foreground;
+  }
+
+  .file-drop-zone {
+    @apply border-2 border-dashed border-border rounded-lg p-8 text-center transition-colors cursor-pointer;
+  }
+
+  .file-drop-zone:hover {
+    @apply border-primary bg-primary/5;
+  }
+
+  .file-drop-zone--active {
+    @apply border-primary bg-primary/10;
+  }
+}
+
+/* Leaflet map container styles */
+.leaflet-container {
+  @apply rounded-lg;
+  font-family: inherit;
+}
+
+.leaflet-popup-content-wrapper {
+  @apply rounded-lg shadow-lg;
+}
+
+.leaflet-popup-content {
+  @apply m-3;
+}
