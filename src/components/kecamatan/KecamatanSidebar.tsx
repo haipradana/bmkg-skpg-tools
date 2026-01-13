@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CheckCircle2, Circle, ChevronRight, ChevronDown, MapPin, Search } from 'lucide-react';
@@ -36,6 +36,9 @@ export const KecamatanSidebar: React.FC<KecamatanSidebarProps> = ({
 
   const visitedKecamatan = visitedKecamatanPerStep[currentStep] || [];
   
+  // Ref to track selected kecamatan button for auto-scroll
+  const selectedKecamatanRef = useRef<HTMLButtonElement>(null);
+  
   // Mark the initial kecamatan as visited when component mounts
   useEffect(() => {
     markKecamatanVisited(currentStep, selectedKecamatan);
@@ -54,6 +57,16 @@ export const KecamatanSidebar: React.FC<KecamatanSidebarProps> = ({
       }
     }
   }, [selectedKecamatan, currentKecIndex]);
+  
+  // Auto-scroll to selected kecamatan when it changes
+  useEffect(() => {
+    if (selectedKecamatanRef.current) {
+      selectedKecamatanRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
+  }, [selectedKecamatan]);
   
   const handleKecamatanClick = (kec: string, indexInList?: number) => {
     setSelectedKecamatan(kec);
@@ -186,6 +199,7 @@ export const KecamatanSidebar: React.FC<KecamatanSidebarProps> = ({
                             return (
                               <button
                                 key={kecKey}
+                                ref={isSelected ? selectedKecamatanRef : null}
                                 onClick={() => handleKecamatanClick(kecKey, globalIdx)}
                                 className={cn(
                                   "w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left transition-all text-sm",
