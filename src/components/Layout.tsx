@@ -10,7 +10,7 @@ const Layout: React.FC = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="border-b border-border bg-card">
+      <header className="sticky top-0 z-50 border-b border-border bg-card">
         <div className="container max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
