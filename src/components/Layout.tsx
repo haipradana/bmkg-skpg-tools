@@ -2,12 +2,13 @@ import React from "react";
 import { Outlet, useLocation, Link } from "react-router-dom";
 import { Home } from "lucide-react";
 import { Button } from "./ui/button";
+import { Footer } from "./Footer";
 
 const Layout: React.FC = () => {
   const location = useLocation();
   
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="border-b border-border bg-card">
         <div className="container max-w-7xl mx-auto px-4 py-4">
@@ -65,6 +66,9 @@ const Layout: React.FC = () => {
 
       {/* Page Content */}
       <Outlet />
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
