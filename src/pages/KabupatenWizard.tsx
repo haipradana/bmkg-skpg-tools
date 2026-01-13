@@ -312,7 +312,7 @@ const KabupatenWizard: React.FC = () => {
                 Ikuti langkah-langkah berikut untuk melengkapi data SKPG
               </p>
             </div>
-            <Button variant="outline" size="sm" onClick={handleReset}>
+            <Button variant="destructive" size="sm" onClick={handleReset}>
               <RotateCcw className="w-4 h-4 mr-2" />
               Reset
             </Button>
