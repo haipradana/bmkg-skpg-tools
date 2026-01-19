@@ -111,19 +111,13 @@ export const DualInputTabs: React.FC<DualInputTabsProps> = ({
 
         {/* Content */}
         <TabsContent value="kabupaten" className="mt-0">
-          <div className={cn(
-            "rounded-lg border-2 p-4",
-            "border-amber-200 bg-amber-50/30"
-          )}>
+          <div className="rounded-lg border p-4">
             {kabupatenContent}
           </div>
         </TabsContent>
 
         <TabsContent value="kecamatan" className="mt-0">
-          <div className={cn(
-            "rounded-lg border-2 p-4",
-            "border-teal-200 bg-teal-50/30"
-          )}>
+          <div className="rounded-lg border p-4">
             {kecamatanContent}
           </div>
         </TabsContent>
