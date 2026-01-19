@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Building2, FileSpreadsheet, Zap } from 'lucide-react';
+import { MapPin, Building2, FileSpreadsheet, Zap, Layers } from 'lucide-react';
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
@@ -33,24 +33,41 @@ const Landing: React.FC = () => {
           </div>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
+          <div className="flex flex-col gap-4 justify-center pt-8">
+            {/* Primary: Combined Input */}
             <Button
               size="lg"
-              onClick={() => navigate('/kabupaten')}
-              className="text-lg px-8 py-6 h-auto"
+              onClick={() => navigate('/combined')}
+              className="text-lg px-10 py-7 h-auto"
             >
-              <Building2 className="w-5 h-5 mr-2" />
-              Isi Data Kabupaten
+              <Layers className="w-6 h-6 mr-3" />
+              Isi Data Lengkap (Kab + Kec)
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => navigate('/kecamatan')}
-              className="text-lg px-8 py-6 h-auto"
-            >
-              <MapPin className="w-5 h-5 mr-2" />
-              Isi Data Kecamatan
-            </Button>
+            <p className="text-sm text-muted-foreground text-center -mt-2">
+              Rekomen: Input sekali, export 2 file Excel
+            </p>
+            
+            {/* Secondary Options */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-2">
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => navigate('/kabupaten')}
+                className="text-base px-6 py-5 h-auto"
+              >
+                <Building2 className="w-5 h-5 mr-2" />
+                Kabupaten Saja
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => navigate('/kecamatan')}
+                className="text-base px-6 py-5 h-auto"
+              >
+                <MapPin className="w-5 h-5 mr-2" />
+                Kecamatan Saja
+              </Button>
+            </div>
           </div>
         </div>
       </section>

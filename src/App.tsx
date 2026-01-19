@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
 import KabupatenWizard from "./pages/KabupatenWizard";
 import KecamatanWizard from "./pages/KecamatanWizard";
+import CombinedWizard from "./pages/CombinedWizard";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
 
@@ -50,6 +51,7 @@ const App = () => (
           <Route element={<Layout />}>
             <Route path="/kabupaten" element={<KabupatenWizard />} />
             <Route path="/kecamatan" element={<KecamatanWizard />} />
+            <Route path="/combined" element={<CombinedWizard />} />
           </Route>
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
