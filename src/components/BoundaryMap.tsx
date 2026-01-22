@@ -78,28 +78,28 @@ const BoundaryMap: React.FC<BoundaryMapProps> = ({
   // ===== STANDARD (BULANAN) COLOR FUNCTIONS =====
   // Fungsi untuk mendapatkan warna berdasarkan nilai CH (Curah Hujan) - Standar BMKG Bulanan
   const getCHColor = (ch: number): string => {
-    // Klasifikasi berdasarkan nilai CH dalam mm
-    if (ch > 500) return "#1a4d2e"; // >500mm - Sangat Tinggi - hijau tua
-    if (ch >= 401) return "#2d5a3d"; // 401-500mm - Tinggi - hijau
-    if (ch >= 301) return "#4f7942"; // 301-400mm - Tinggi - hijau sedang
-    if (ch >= 201) return "#8bc34a"; // 201-300mm - Menengah - hijau muda
-    if (ch >= 151) return "#ffeb3b"; // 151-200mm - Menengah - kuning
-    if (ch >= 101) return "#ffc107"; // 101-150mm - Menengah - kuning tua
-    if (ch >= 51) return "#ff9800"; // 51-100mm - Rendah - oranye
-    if (ch >= 21) return "#d35400"; // 21-50mm - Rendah - oranye gelap
-    return "#8b4513"; // 0-20mm - Rendah - coklat
+    // Klasifikasi berdasarkan nilai CH dalam mm - BMKG Color Scheme
+    if (ch > 500) return "#00460C";   // >500mm - Sangat Tinggi - hijau sangat tua
+    if (ch >= 401) return "#369135";  // 401-500mm - Tinggi - hijau tua
+    if (ch >= 301) return "#8AD58B";  // 301-400mm - Tinggi - hijau sedang
+    if (ch >= 201) return "#E0FD68";  // 201-300mm - Menengah - hijau muda
+    if (ch >= 151) return "#EBE100";  // 151-200mm - Menengah - kuning
+    if (ch >= 101) return "#EFA800";  // 101-150mm - Menengah - kuning tua/oranye
+    if (ch >= 51) return "#DC6200";   // 51-100mm - Rendah - oranye
+    if (ch >= 21) return "#8E2800";   // 21-50mm - Rendah - coklat
+    return "#340A00";                  // 0-20mm - Sangat Rendah - coklat tua
   };
 
   // Fungsi untuk mendapatkan warna berdasarkan nilai SH (Sifat Hujan %) - Standar BMKG Bulanan
   const getSHColor = (sh: number): string => {
-    // Klasifikasi berdasarkan nilai SH sebagai persentase normal
-    if (sh > 200) return "#1a4d2e"; // >200% - Atas Normal - hijau tua
-    if (sh >= 151) return "#2d5a3d"; // 151-200% - Atas Normal - hijau
-    if (sh >= 116) return "#4f7942"; // 116-150% - Atas Normal - hijau sedang
-    if (sh >= 85) return "#ffeb3b"; // 85-115% - Normal - kuning
-    if (sh >= 51) return "#ffc107"; // 51-84% - Bawah Normal - kuning tua
-    if (sh >= 31) return "#ff9800"; // 31-50% - Bawah Normal - oranye
-    return "#8b4513"; // 0-30% - Bawah Normal - coklat
+    // Klasifikasi berdasarkan nilai SH sebagai persentase normal - BMKG Color Scheme
+    if (sh > 200) return "#00460E";   // >200% - Atas Normal - hijau sangat tua
+    if (sh >= 151) return "#238129";  // 151-200% - Atas Normal - hijau tua
+    if (sh >= 116) return "#8BB700";  // 116-150% - Atas Normal - hijau
+    if (sh >= 85) return "#FFFF00";   // 85-115% - Normal - kuning terang
+    if (sh >= 51) return "#F3C40F";   // 51-84% - Bawah Normal - kuning
+    if (sh >= 31) return "#A85B00";   // 31-50% - Bawah Normal - oranye
+    return "#4A1600";                  // 0-30% - Bawah Normal - coklat tua
   };
 
   // ===== LEGEND ITEMS =====
@@ -127,28 +127,28 @@ const BoundaryMap: React.FC<BoundaryMapProps> = ({
     { color: "#4A1600", label: "0 - 30%" },
   ];
 
-  // Legenda items untuk CH BULANAN (standar)
+  // Legenda items untuk CH BULANAN (standar) - BMKG Color Scheme
   const chLegendItems = [
-    { color: "#1a4d2e", label: "> 500 mm" },
-    { color: "#2d5a3d", label: "401 - 500 mm" },
-    { color: "#4f7942", label: "301 - 400 mm" },
-    { color: "#8bc34a", label: "201 - 300 mm" },
-    { color: "#ffeb3b", label: "151 - 200 mm" },
-    { color: "#ffc107", label: "101 - 150 mm" },
-    { color: "#ff9800", label: "51 - 100 mm" },
-    { color: "#d35400", label: "21 - 50 mm" },
-    { color: "#8b4513", label: "0 - 20 mm" },
+    { color: "#00460C", label: "> 500 mm" },
+    { color: "#369135", label: "401 - 500 mm" },
+    { color: "#8AD58B", label: "301 - 400 mm" },
+    { color: "#E0FD68", label: "201 - 300 mm" },
+    { color: "#EBE100", label: "151 - 200 mm" },
+    { color: "#EFA800", label: "101 - 150 mm" },
+    { color: "#DC6200", label: "51 - 100 mm" },
+    { color: "#8E2800", label: "21 - 50 mm" },
+    { color: "#340A00", label: "0 - 20 mm" },
   ];
 
-  // Legenda items untuk SH BULANAN (standar)
+  // Legenda items untuk SH BULANAN (standar) - BMKG Color Scheme
   const shLegendItems = [
-    { color: "#1a4d2e", label: "> 200%" },
-    { color: "#2d5a3d", label: "151 - 200%" },
-    { color: "#4f7942", label: "116 - 150%" },
-    { color: "#ffeb3b", label: "85 - 115%" },
-    { color: "#ffc107", label: "51 - 84%" },
-    { color: "#ff9800", label: "31 - 50%" },
-    { color: "#8b4513", label: "0 - 30%" },
+    { color: "#00460E", label: "> 200%" },
+    { color: "#238129", label: "151 - 200%" },
+    { color: "#8BB700", label: "116 - 150%" },
+    { color: "#FFFF00", label: "85 - 115%" },
+    { color: "#F3C40F", label: "51 - 84%" },
+    { color: "#A85B00", label: "31 - 50%" },
+    { color: "#4A1600", label: "0 - 30%" },
   ];
 
   // Pilih fungsi warna yang sesuai berdasarkan isDasarian

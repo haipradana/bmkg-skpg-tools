@@ -21,8 +21,8 @@ const steps: Step[] = [
   { id: 1, title: 'Anomali Basah', description: 'La Niña, IOD- (per Kab)' },
   { id: 2, title: 'Musim', description: 'Kemarau/Hujan (per Kab)' },
   { id: 3, title: 'HTH', description: 'Hari Tanpa Hujan' },
-  { id: 4, title: 'CH/SH Bulanan', description: 'Bulan -1' },
-  { id: 5, title: 'CH/SH Dasarian', description: 'Bulan 0' },
+  { id: 4, title: 'Analisis CH/SH Bulanan', description: 'Bulan -1' },
+  { id: 5, title: 'Analisis CH/SH Dasarian', description: 'Bulan 0' },
   { id: 6, title: 'Prediksi +1', description: 'Bulan +1' },
   { id: 7, title: 'Prediksi +2', description: 'Bulan +2' },
   { id: 8, title: 'Prediksi +3', description: 'Bulan +3' },
@@ -194,7 +194,7 @@ const CombinedWizard: React.FC = () => {
         return (
           <StepCombinedCHSH
             period="monthly"
-            title="CH/SH Bulanan (Bulan -1)"
+            title="Analisis CH/SH Bulanan (Bulan -1)"
             description="Upload data CH dan SH untuk bulan sebelumnya (monitoring iklim regional)"
           />
         );

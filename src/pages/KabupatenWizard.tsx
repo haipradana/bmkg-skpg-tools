@@ -255,7 +255,7 @@ const KabupatenWizard: React.FC = () => {
         return (
           <StepCHSH
             period="monthly"
-            title="CH/SH Bulanan (Bulan -1)"
+            title="Analisis CH/SH Bulanan (Bulan -1)"
             description="Upload data CH dan SH untuk bulan sebelumnya (monitoring iklim regional)"
           />
         );
