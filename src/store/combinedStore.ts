@@ -298,6 +298,34 @@ function createDefaultCHSHData(): CHSHData {
     };
 }
 
+// Dasarian has different CH thresholds:
+// CH Rendah: < 50 mm/dasarian
+// CH Tinggi: > 150 mm/dasarian
+function createDefaultCHSHDataDasarian(): CHSHData {
+    return {
+        uploadMode: 'mode2',
+        mode1File: null,
+        mode1Parsed: null,
+        mode1ColumnMapping: null,
+        chFile: null,
+        shFile: null,
+        chParsed: null,
+        shParsed: null,
+        chColumnMapping: null,
+        shColumnMapping: null,
+        thresholds: {
+            chLow: [0, 49],       // CH Dasarian Rendah: < 50 mm
+            chHigh: 151,          // CH Dasarian Tinggi: > 150 mm
+            shBN: [0, 84],        // SH same as monthly
+            shAN: [116, 9999],    // SH same as monthly
+        },
+        resultsKabupaten: null,
+        resultsKecamatan: null,
+        matchingMethod: 'coordinates',
+        useGridInterpolation: true,
+    };
+}
+
 const initialState = {
     currentStep: 0,
     completedSteps: [] as number[],
@@ -310,7 +338,7 @@ const initialState = {
     kecamatanData: createInitialKecamatanData(),
     hthData: createDefaultHTHData(),
     chshMonthly: createDefaultCHSHData(),
-    chshDasarian: createDefaultCHSHData(),
+    chshDasarian: createDefaultCHSHDataDasarian(), // Use dasarian-specific thresholds
     chshPredictionPlus1: createDefaultCHSHData(),
     chshPredictionPlus2: createDefaultCHSHData(),
     chshPredictionPlus3: createDefaultCHSHData(),
@@ -377,14 +405,11 @@ export const useCombinedStore = create<CombinedWizardState>()(
                 return KECAMATAN_LIST.every(kec => visited.includes(kec));
             },
 
-            // For steps 0-2, both levels must be complete
+            // For steps 0-2, only kabupaten input is needed (kecamatan auto-filled)
             isStepComplete: (step) => {
-                const state = get();
-                if (step <= 2) {
-                    // Dual input steps - both kabupaten AND kecamatan must be visited
-                    return state.isAllKabupatenVisited(step) && state.isAllKecamatanVisited(step);
-                }
-                return true; // Other steps don't have this requirement
+                // Steps 0-2 use kabupaten-only input, kecamatan is auto-filled
+                // No visit tracking needed for these steps
+                return true; // Always complete since all kabupaten cards are visible
             },
 
             // Kabupaten data updates
@@ -598,6 +623,42 @@ export const useCombinedStore = create<CombinedWizardState>()(
                 },
                 finalResults: state.finalResults,
             }),
+            merge: (persistedState, currentState) => {
+                const persisted = persistedState as Partial<CombinedWizardState>;
+
+                // Default thresholds for monthly/prediction (bulanan)
+                const defaultThresholdsBulanan = {
+                    chLow: [0, 100] as [number, number],
+                    chHigh: 301,
+                    shBN: [0, 84] as [number, number],
+                    shAN: [116, 9999] as [number, number],
+                };
+
+                // Default thresholds for dasarian (10-daily)
+                const defaultThresholdsDasarian = {
+                    chLow: [0, 49] as [number, number],  // CH < 50 mm
+                    chHigh: 151,                         // CH > 150 mm
+                    shBN: [0, 84] as [number, number],
+                    shAN: [116, 9999] as [number, number],
+                };
+
+                // Merge with appropriate thresholds for each CHSH period
+                const mergeChsh = (stored: Partial<CHSHData> | undefined, current: CHSHData, defaultThresholds: typeof defaultThresholdsBulanan): CHSHData => ({
+                    ...current,
+                    ...stored,
+                    thresholds: stored?.thresholds || defaultThresholds,
+                });
+
+                return {
+                    ...currentState,
+                    ...persisted,
+                    chshMonthly: mergeChsh(persisted.chshMonthly, currentState.chshMonthly, defaultThresholdsBulanan),
+                    chshDasarian: mergeChsh(persisted.chshDasarian, currentState.chshDasarian, defaultThresholdsDasarian),
+                    chshPredictionPlus1: mergeChsh(persisted.chshPredictionPlus1, currentState.chshPredictionPlus1, defaultThresholdsBulanan),
+                    chshPredictionPlus2: mergeChsh(persisted.chshPredictionPlus2, currentState.chshPredictionPlus2, defaultThresholdsBulanan),
+                    chshPredictionPlus3: mergeChsh(persisted.chshPredictionPlus3, currentState.chshPredictionPlus3, defaultThresholdsBulanan),
+                };
+            },
         }
     )
 );

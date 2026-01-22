@@ -1028,6 +1028,7 @@ export const StepCHSHKec: React.FC<StepCHSHProps> = ({ period, title, descriptio
                     selectedMetric={selectedMetric}
                     points={matchedPoints}
                     isGridInterpolation={data.useGridInterpolation}
+                    isDasarian={period === 'dasarian'}
                   />
                 </Suspense>
               </CardContent>

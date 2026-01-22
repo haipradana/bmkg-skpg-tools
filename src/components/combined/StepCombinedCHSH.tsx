@@ -676,8 +676,17 @@ export const StepCombinedCHSH: React.FC<StepCombinedCHSHProps> = ({ period, titl
             <div>
               <p className="font-semibold mb-2">CH (Curah Hujan):</p>
               <ul className="space-y-1 text-muted-foreground">
-                <li>• CH Rendah: 0 - 100 mm</li>
-                <li>• CH Tinggi: ≥ 301 mm</li>
+                {period === 'dasarian' ? (
+                  <>
+                    <li>• CH Rendah: &lt; 50 mm/dasarian</li>
+                    <li>• CH Tinggi: &gt; 150 mm/dasarian</li>
+                  </>
+                ) : (
+                  <>
+                    <li>• CH Rendah: 0 - 100 mm</li>
+                    <li>• CH Tinggi: ≥ 301 mm</li>
+                  </>
+                )}
               </ul>
             </div>
             <div>
@@ -855,6 +864,7 @@ export const StepCombinedCHSH: React.FC<StepCombinedCHSHProps> = ({ period, titl
                     selectedMetric={selectedMetric}
                     points={matchedPoints}
                     isGridInterpolation={data.useGridInterpolation}
+                    isDasarian={period === 'dasarian'}
                   />
                 </Suspense>
               </CardContent>

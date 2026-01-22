@@ -5,14 +5,36 @@ import { useCombinedStore } from '@/store/combinedStore';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
 import { CombinedKabupatenSidebar } from './CombinedKabupatenSidebar';
-import { CombinedKecamatanSidebar } from './CombinedKecamatanSidebar';
-import { DualInputTabs } from './DualInputTabs';
-import { getKecamatanFromKey } from '@/store/kecamatanStore';
+import { KECAMATAN_BY_KABUPATEN, createKecamatanKey } from '@/store/kecamatanStore';
 
-// Kabupaten Content
+// Content component for kabupaten input
 const KabupatenAnomalyDryContent: React.FC = () => {
-  const { kabupatenData, selectedKabupaten, updateKabupatenGlobalAnomaliesDry } = useCombinedStore();
+  const { 
+    kabupatenData, 
+    selectedKabupaten, 
+    updateKabupatenGlobalAnomaliesDry,
+    updateKecamatanGlobalAnomaliesDry 
+  } = useCombinedStore();
+  
   const data = kabupatenData[selectedKabupaten].globalAnomaliesDry;
+
+  // Update kabupaten AND all its kecamatan
+  const handleUpdate = (field: keyof typeof data, value: 0 | 1) => {
+    // Update kabupaten
+    updateKabupatenGlobalAnomaliesDry(selectedKabupaten, { [field]: value });
+    
+    // Auto-fill: Update all kecamatan in this kabupaten
+    const kecamatanList = KECAMATAN_BY_KABUPATEN[selectedKabupaten as keyof typeof KECAMATAN_BY_KABUPATEN];
+    if (kecamatanList) {
+      kecamatanList.forEach((kec) => {
+        const kecKey = createKecamatanKey(selectedKabupaten, kec);
+        updateKecamatanGlobalAnomaliesDry(kecKey, { [field]: value });
+      });
+    }
+  };
+
+  // Get kecamatan count
+  const kecCount = KECAMATAN_BY_KABUPATEN[selectedKabupaten as keyof typeof KECAMATAN_BY_KABUPATEN]?.length || 0;
 
   return (
     <CombinedKabupatenSidebar>
@@ -21,6 +43,9 @@ const KabupatenAnomalyDryContent: React.FC = () => {
         <AlertDescription className="text-amber-800">
           Pilih <strong>1</strong> jika kondisi aktif/terjadi, pilih <strong>0</strong> jika tidak.
           <strong className="block mt-1">Data untuk: {selectedKabupaten}</strong>
+          <span className="text-xs text-amber-600 block mt-1">
+            → Nilai akan otomatis diterapkan ke {kecCount} kecamatan dalam kabupaten ini
+          </span>
         </AlertDescription>
       </Alert>
 
@@ -35,7 +60,7 @@ const KabupatenAnomalyDryContent: React.FC = () => {
           <CardContent>
             <SegmentedControl
               value={data.elNino}
-              onChange={(val) => updateKabupatenGlobalAnomaliesDry(selectedKabupaten, { elNino: val })}
+              onChange={(val) => handleUpdate('elNino', val)}
               label="Status El Niño"
             />
           </CardContent>
@@ -51,7 +76,7 @@ const KabupatenAnomalyDryContent: React.FC = () => {
           <CardContent>
             <SegmentedControl
               value={data.iodPositif}
-              onChange={(val) => updateKabupatenGlobalAnomaliesDry(selectedKabupaten, { iodPositif: val })}
+              onChange={(val) => handleUpdate('iodPositif', val)}
               label="Status IOD Positif"
             />
           </CardContent>
@@ -67,7 +92,7 @@ const KabupatenAnomalyDryContent: React.FC = () => {
           <CardContent>
             <SegmentedControl
               value={data.elNinoBerlanjut}
-              onChange={(val) => updateKabupatenGlobalAnomaliesDry(selectedKabupaten, { elNinoBerlanjut: val })}
+              onChange={(val) => handleUpdate('elNinoBerlanjut', val)}
               label="Status El Niño Berlanjut"
             />
           </CardContent>
@@ -83,7 +108,7 @@ const KabupatenAnomalyDryContent: React.FC = () => {
           <CardContent>
             <SegmentedControl
               value={data.iodPositifBerlanjut}
-              onChange={(val) => updateKabupatenGlobalAnomaliesDry(selectedKabupaten, { iodPositifBerlanjut: val })}
+              onChange={(val) => handleUpdate('iodPositifBerlanjut', val)}
               label="Status IOD Positif Berlanjut"
             />
           </CardContent>
@@ -93,104 +118,20 @@ const KabupatenAnomalyDryContent: React.FC = () => {
   );
 };
 
-// Kecamatan Content
-const KecamatanAnomalyDryContent: React.FC = () => {
-  const { kecamatanData, selectedKecamatan, updateKecamatanGlobalAnomaliesDry } = useCombinedStore();
-  const data = kecamatanData[selectedKecamatan]?.globalAnomaliesDry || {
-    elNino: 0,
-    iodPositif: 0,
-    elNinoBerlanjut: 0,
-    iodPositifBerlanjut: 0,
-  };
-  const displayName = getKecamatanFromKey(selectedKecamatan);
-
-  return (
-    <CombinedKecamatanSidebar>
-      <Alert className="mb-6 bg-teal-50 border-teal-200">
-        <Info className="h-4 w-4 text-teal-600" />
-        <AlertDescription className="text-teal-800">
-          Pilih <strong>1</strong> jika kondisi aktif/terjadi, pilih <strong>0</strong> jika tidak.
-          <strong className="block mt-1">Data untuk: {displayName}</strong>
-        </AlertDescription>
-      </Alert>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>El Niño</CardTitle>
-            <CardDescription>
-              Fenomena pemanasan suhu permukaan laut di Pasifik Tengah dan Timur yang dapat menyebabkan penurunan curah hujan di Indonesia
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SegmentedControl
-              value={data.elNino}
-              onChange={(val) => updateKecamatanGlobalAnomaliesDry(selectedKecamatan, { elNino: val })}
-              label="Status El Niño"
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>IOD Positif</CardTitle>
-            <CardDescription>
-              Indian Ocean Dipole fase positif yang umumnya menyebabkan kondisi lebih kering di sebagian wilayah Indonesia
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SegmentedControl
-              value={data.iodPositif}
-              onChange={(val) => updateKecamatanGlobalAnomaliesDry(selectedKecamatan, { iodPositif: val })}
-              label="Status IOD Positif"
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>El Niño Berlanjut</CardTitle>
-            <CardDescription>
-              Indikasi bahwa fenomena El Niño diprediksi akan berlanjut pada bulan berikutnya
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SegmentedControl
-              value={data.elNinoBerlanjut}
-              onChange={(val) => updateKecamatanGlobalAnomaliesDry(selectedKecamatan, { elNinoBerlanjut: val })}
-              label="Status El Niño Berlanjut"
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>IOD Positif Berlanjut</CardTitle>
-            <CardDescription>
-              Indikasi bahwa IOD positif diprediksi akan berlanjut pada bulan berikutnya
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SegmentedControl
-              value={data.iodPositifBerlanjut}
-              onChange={(val) => updateKecamatanGlobalAnomaliesDry(selectedKecamatan, { iodPositifBerlanjut: val })}
-              label="Status IOD Positif Berlanjut"
-            />
-          </CardContent>
-        </Card>
-      </div>
-    </CombinedKecamatanSidebar>
-  );
-};
-
-// Main Component with Dual Tabs
+// Main Component - Kabupaten only (no dual tabs)
 export const StepDualAnomaliesDry: React.FC = () => {
   return (
-    <DualInputTabs
-      title="Anomali Iklim Global - Kering"
-      description="Isi data anomali kering untuk Kabupaten dan Kecamatan (terpisah)."
-      kabupatenContent={<KabupatenAnomalyDryContent />}
-      kecamatanContent={<KecamatanAnomalyDryContent />}
-    />
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="mb-4">
+        <h2 className="text-2xl font-bold">Anomali Iklim Global - Kering</h2>
+        <p className="text-muted-foreground mt-2">
+          Isi data anomali kering untuk setiap Kabupaten. Nilai akan otomatis diterapkan ke semua kecamatan dalam kabupaten tersebut.
+        </p>
+      </div>
+
+      {/* Kabupaten Content with Sidebar */}
+      <KabupatenAnomalyDryContent />
+    </div>
   );
 };

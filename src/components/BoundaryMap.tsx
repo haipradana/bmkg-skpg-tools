@@ -24,6 +24,7 @@ interface BoundaryMapProps {
   selectedMetric: MetricType;
   points?: PointData[];  // Tambahan: array titik data untuk visualisasi
   isGridInterpolation?: boolean; // Flag untuk menandakan data dari grid interpolasi
+  isDasarian?: boolean; // Flag untuk menandakan data dasarian (rentang warna berbeda)
 }
 
 const BoundaryMap: React.FC<BoundaryMapProps> = ({
@@ -33,6 +34,7 @@ const BoundaryMap: React.FC<BoundaryMapProps> = ({
   selectedMetric,
   points = [],
   isGridInterpolation = false,
+  isDasarian = false,
 }) => {
   // Debug: log jumlah points yang akan di-render
   React.useEffect(() => {
@@ -48,7 +50,33 @@ const BoundaryMap: React.FC<BoundaryMapProps> = ({
     return map;
   }, [results]);
 
-  // Fungsi untuk mendapatkan warna berdasarkan nilai CH (Curah Hujan) - Standar BMKG
+  // ===== DASARIAN COLOR FUNCTIONS =====
+  // Fungsi warna CH untuk DASARIAN (rentang lebih kecil, 10-harian)
+  const getCHColorDasarian = (ch: number): string => {
+    if (ch > 300) return "#00460C";   // >300mm - Sangat Tinggi - hijau sangat tua
+    if (ch >= 200) return "#369135";  // 200-300mm - Tinggi - hijau tua
+    if (ch >= 150) return "#8AD58B";  // 150-200mm - Tinggi - hijau sedang
+    if (ch >= 100) return "#E0FD68";  // 100-150mm - Menengah - hijau muda
+    if (ch >= 75) return "#EBE100";   // 75-100mm - Menengah - kuning
+    if (ch >= 50) return "#EFA800";   // 50-75mm - Menengah - kuning tua/oranye
+    if (ch >= 20) return "#DC6200";   // 20-50mm - Rendah - oranye
+    if (ch >= 10) return "#8E2800";   // 10-20mm - Rendah - coklat
+    return "#340A00";                  // 0-10mm - Sangat Rendah - coklat tua
+  };
+
+  // Fungsi warna SH untuk DASARIAN
+  const getSHColorDasarian = (sh: number): string => {
+    if (sh > 200) return "#00460E";   // >200% - Atas Normal - hijau sangat tua
+    if (sh >= 151) return "#238129";  // 151-200% - Atas Normal - hijau tua
+    if (sh >= 116) return "#8BB700";  // 116-150% - Atas Normal - hijau
+    if (sh >= 85) return "#FFFF00";   // 85-115% - Normal - kuning terang
+    if (sh >= 51) return "#F3C40F";   // 51-84% - Bawah Normal - kuning
+    if (sh >= 31) return "#A85B00";   // 31-50% - Bawah Normal - oranye
+    return "#4A1600";                  // 0-30% - Bawah Normal - coklat tua
+  };
+
+  // ===== STANDARD (BULANAN) COLOR FUNCTIONS =====
+  // Fungsi untuk mendapatkan warna berdasarkan nilai CH (Curah Hujan) - Standar BMKG Bulanan
   const getCHColor = (ch: number): string => {
     // Klasifikasi berdasarkan nilai CH dalam mm
     if (ch > 500) return "#1a4d2e"; // >500mm - Sangat Tinggi - hijau tua
@@ -62,7 +90,7 @@ const BoundaryMap: React.FC<BoundaryMapProps> = ({
     return "#8b4513"; // 0-20mm - Rendah - coklat
   };
 
-  // Fungsi untuk mendapatkan warna berdasarkan nilai SH (Sifat Hujan %) - Standar BMKG
+  // Fungsi untuk mendapatkan warna berdasarkan nilai SH (Sifat Hujan %) - Standar BMKG Bulanan
   const getSHColor = (sh: number): string => {
     // Klasifikasi berdasarkan nilai SH sebagai persentase normal
     if (sh > 200) return "#1a4d2e"; // >200% - Atas Normal - hijau tua
@@ -74,7 +102,32 @@ const BoundaryMap: React.FC<BoundaryMapProps> = ({
     return "#8b4513"; // 0-30% - Bawah Normal - coklat
   };
 
-  // Legenda items untuk CH
+  // ===== LEGEND ITEMS =====
+  // Legenda items untuk CH DASARIAN
+  const chLegendItemsDasarian = [
+    { color: "#00460C", label: "> 300 mm" },
+    { color: "#369135", label: "200 - 300 mm" },
+    { color: "#8AD58B", label: "150 - 200 mm" },
+    { color: "#E0FD68", label: "100 - 150 mm" },
+    { color: "#EBE100", label: "75 - 100 mm" },
+    { color: "#EFA800", label: "50 - 75 mm" },
+    { color: "#DC6200", label: "20 - 50 mm" },
+    { color: "#8E2800", label: "10 - 20 mm" },
+    { color: "#340A00", label: "0 - 10 mm" },
+  ];
+
+  // Legenda items untuk SH DASARIAN
+  const shLegendItemsDasarian = [
+    { color: "#00460E", label: "> 200%" },
+    { color: "#238129", label: "151 - 200%" },
+    { color: "#8BB700", label: "116 - 150%" },
+    { color: "#FFFF00", label: "85 - 115%" },
+    { color: "#F3C40F", label: "51 - 84%" },
+    { color: "#A85B00", label: "31 - 50%" },
+    { color: "#4A1600", label: "0 - 30%" },
+  ];
+
+  // Legenda items untuk CH BULANAN (standar)
   const chLegendItems = [
     { color: "#1a4d2e", label: "> 500 mm" },
     { color: "#2d5a3d", label: "401 - 500 mm" },
@@ -87,7 +140,7 @@ const BoundaryMap: React.FC<BoundaryMapProps> = ({
     { color: "#8b4513", label: "0 - 20 mm" },
   ];
 
-  // Legenda items untuk SH
+  // Legenda items untuk SH BULANAN (standar)
   const shLegendItems = [
     { color: "#1a4d2e", label: "> 200%" },
     { color: "#2d5a3d", label: "151 - 200%" },
@@ -97,6 +150,10 @@ const BoundaryMap: React.FC<BoundaryMapProps> = ({
     { color: "#ff9800", label: "31 - 50%" },
     { color: "#8b4513", label: "0 - 30%" },
   ];
+
+  // Pilih fungsi warna yang sesuai berdasarkan isDasarian
+  const getColorForCH = isDasarian ? getCHColorDasarian : getCHColor;
+  const getColorForSH = isDasarian ? getSHColorDasarian : getSHColor;
 
   // Style function untuk polygon kabupaten (hanya batas, tidak diwarnai)
   const getStyle = (): PathOptions => {
@@ -163,8 +220,10 @@ const BoundaryMap: React.FC<BoundaryMapProps> = ({
     }
   };
 
-  // Legenda warna sesuai standar BMKG (menggunakan chLegendItems dan shLegendItems yang sudah didefinisikan)
-  const legendItems = selectedMetric === "ach" ? chLegendItems : shLegendItems;
+  // Legenda warna sesuai berdasarkan isDasarian dan metric
+  const legendItems = selectedMetric === "ach" 
+    ? (isDasarian ? chLegendItemsDasarian : chLegendItems)
+    : (isDasarian ? shLegendItemsDasarian : shLegendItems);
 
   // Pastikan hanya render di client-side
   if (typeof window === 'undefined') {
@@ -201,7 +260,7 @@ const BoundaryMap: React.FC<BoundaryMapProps> = ({
         {/* Render titik-titik data dengan warna sesuai nilai CH/SH - render dulu agar di bawah */}
         {points.map((point, idx) => {
           const value = selectedMetric === "ach" ? point.CH : point.SH;
-          const color = selectedMetric === "ach" ? getCHColor(value) : getSHColor(value);
+          const color = selectedMetric === "ach" ? getColorForCH(value) : getColorForSH(value);
           
           // Hitung bounds untuk rectangle
           // Untuk grid replication: gunakan ukuran 0.01° untuk GARANTEE NO GAP

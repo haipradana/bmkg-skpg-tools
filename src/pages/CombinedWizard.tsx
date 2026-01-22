@@ -17,9 +17,9 @@ import { toast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
 
 const steps: Step[] = [
-  { id: 0, title: 'Anomali Kering', description: 'El Niño, IOD+ (Kab+Kec)' },
-  { id: 1, title: 'Anomali Basah', description: 'La Niña, IOD- (Kab+Kec)' },
-  { id: 2, title: 'Musim', description: 'Kemarau/Hujan (Kab+Kec)' },
+  { id: 0, title: 'Anomali Kering', description: 'El Niño, IOD+ (per Kab)' },
+  { id: 1, title: 'Anomali Basah', description: 'La Niña, IOD- (per Kab)' },
+  { id: 2, title: 'Musim', description: 'Kemarau/Hujan (per Kab)' },
   { id: 3, title: 'HTH', description: 'Hari Tanpa Hujan' },
   { id: 4, title: 'CH/SH Bulanan', description: 'Bulan -1' },
   { id: 5, title: 'CH/SH Dasarian', description: 'Bulan 0' },
@@ -54,34 +54,9 @@ const CombinedWizard: React.FC = () => {
 
   // Validasi untuk setiap step
   const validateStep = (step: number): { isValid: boolean; message?: string } => {
-    const visitedKab = visitedKabupatenPerStep[step] || [];
-    const visitedKec = visitedKecamatanPerStep[step] || [];
-    
-    // Steps 0-2 require both kabupaten AND kecamatan to be visited
+    // Steps 0-2: Kabupaten-only input (kecamatan auto-filled from kabupaten)
+    // No validation needed - all kabupaten cards are visible and input is applied automatically
     if (step <= 2) {
-      const allKabVisited = KABUPATEN_LIST.every(kab => visitedKab.includes(kab));
-      const allKecVisited = KECAMATAN_LIST.every(kec => visitedKec.includes(kec));
-      
-      if (!allKabVisited && !allKecVisited) {
-        return {
-          isValid: false,
-          message: `Tab Kabupaten dan Kecamatan belum selesai. Silakan lengkapi keduanya.`
-        };
-      }
-      if (!allKabVisited) {
-        const notVisited = KABUPATEN_LIST.filter(kab => !visitedKab.includes(kab));
-        return {
-          isValid: false,
-          message: `Tab Kabupaten: Belum semua dikunjungi (${notVisited.join(', ')})`
-        };
-      }
-      if (!allKecVisited) {
-        const notVisitedCount = KECAMATAN_LIST.filter(kec => !visitedKec.includes(kec)).length;
-        return {
-          isValid: false,
-          message: `Tab Kecamatan: Masih ada ${notVisitedCount} kecamatan yang belum dikunjungi`
-        };
-      }
       return { isValid: true };
     }
     
