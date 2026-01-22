@@ -213,21 +213,31 @@ const collectKecamatanData = (state: any, kec: string) => {
 const createWorkbook = async (
     allData: any[],
     levelName: string,
-    regionColumn: string
+    regionColumn: string,
+    isKecamatan: boolean = false
 ): Promise<ExcelJS.Workbook> => {
     const workbook = new ExcelJS.Workbook();
     workbook.creator = 'SKPG Tools';
     workbook.created = new Date();
 
     const ws = workbook.addWorksheet('Data SKPG', {
-        views: [{ state: 'frozen', xSplit: 3, ySplit: 6 }]
+        views: [{ state: 'frozen', xSplit: isKecamatan ? 4 : 3, ySplit: 6 }]
     });
 
     // Column widths
-    ws.columns = [
+    const baseColumns = [
         { width: 4 },   // A: No
         { width: 5 },   // B: Prov
-        { width: 18 },  // C: Kab/Kec
+    ];
+    
+    if (isKecamatan) {
+        baseColumns.push({ width: 18 }); // C: Kab (only for Kecamatan)
+    }
+    
+    baseColumns.push({ width: 18 }); // C or D: Kec/Kab
+    
+    ws.columns = [
+        ...baseColumns,
         // Kering Section
         { width: 10 }, { width: 10 }, { width: 6 }, { width: 12 },
         { width: 14 }, { width: 14 }, { width: 14 }, { width: 14 },
@@ -248,7 +258,8 @@ const createWorkbook = async (
 
     // Row 1: Title
     ws.getRow(1).height = 23;
-    ws.mergeCells('A1:AU1');
+    const titleMergeCell = isKecamatan ? 'A1:AV1' : 'A1:AU1';
+    ws.mergeCells(titleMergeCell);
     const titleCell = ws.getCell('A1');
     titleCell.value = `Identifikasi Anomali Iklim - Level ${levelName}`;
     titleCell.font = { name: 'Calibri', bold: true, size: 14 };
@@ -256,7 +267,8 @@ const createWorkbook = async (
 
     // Row 2: Score explanation
     ws.getRow(2).height = 18;
-    ws.mergeCells('A2:AU2');
+    const scoreMergeCell = isKecamatan ? 'A2:AV2' : 'A2:AU2';
+    ws.mergeCells(scoreMergeCell);
     const scoreCell = ws.getCell('A2');
     scoreCell.value = 'Jika iya skor = 1 dan jika tidak skor = 0';
     scoreCell.font = { name: 'Calibri', italic: true, size: 10 };
@@ -270,116 +282,180 @@ const createWorkbook = async (
 
     ws.mergeCells('A4:A6');
     ws.mergeCells('B4:B6');
-    ws.mergeCells('C4:C6');
     applyHeaderStyle(ws.getCell('A4'), COLORS.white);
     applyHeaderStyle(ws.getCell('B4'), COLORS.white);
-    applyHeaderStyle(ws.getCell('C4'), COLORS.white);
     ws.getCell('A4').value = 'No';
     ws.getCell('B4').value = 'Prov';
-    ws.getCell('C4').value = regionColumn;
+    
+    if (isKecamatan) {
+        ws.mergeCells('C4:C6');
+        applyHeaderStyle(ws.getCell('C4'), COLORS.white);
+        ws.getCell('C4').value = 'Kab';
+        ws.mergeCells('D4:D6');
+        applyHeaderStyle(ws.getCell('D4'), COLORS.white);
+        ws.getCell('D4').value = regionColumn;
+        
+        ws.mergeCells('E4:V4');
+        applyHeaderStyle(ws.getCell('E4'), COLORS.keringDefault, true, 11);
+        ws.getCell('E4').value = 'Anomali Iklim yang Berpotensi Mengakibatkan Kondisi Lebih Kering';
 
-    ws.mergeCells('D4:U4');
-    applyHeaderStyle(ws.getCell('D4'), COLORS.keringDefault, true, 11);
-    ws.getCell('D4').value = 'Anomali Iklim yang Berpotensi Mengakibatkan Kondisi Lebih Kering';
+        ws.mergeCells('W4:Y5');
+        applyHeaderStyle(ws.getCell('W4'), COLORS.keringDefault);
+        ws.getCell('W4').value = 'Ringkasan Potensi Kering';
 
-    ws.mergeCells('V4:X5');
-    applyHeaderStyle(ws.getCell('V4'), COLORS.keringDefault);
-    ws.getCell('V4').value = 'Ringkasan Potensi Kering';
+        ws.mergeCells('Z4:AQ4');
+        applyHeaderStyle(ws.getCell('Z4'), COLORS.basahDefault, true, 11);
+        ws.getCell('Z4').value = 'Anomali Iklim yang Berpotensi Mengakibatkan Kondisi Lebih Basah';
 
-    ws.mergeCells('Y4:AP4');
-    applyHeaderStyle(ws.getCell('Y4'), COLORS.basahDefault, true, 11);
-    ws.getCell('Y4').value = 'Anomali Iklim yang Berpotensi Mengakibatkan Kondisi Lebih Basah';
+        ws.mergeCells('AR4:AT5');
+        applyHeaderStyle(ws.getCell('AR4'), COLORS.basahDefault);
+        ws.getCell('AR4').value = 'Ringkasan Potensi Basah';
 
-    ws.mergeCells('AQ4:AS5');
-    applyHeaderStyle(ws.getCell('AQ4'), COLORS.basahDefault);
-    ws.getCell('AQ4').value = 'Ringkasan Potensi Basah';
+        ws.mergeCells('AU4:AV5');
+        applyHeaderStyle(ws.getCell('AU4'), COLORS.ringkasanKombinasi);
+        ws.getCell('AU4').value = 'Ringkasan Potensi Anomali Iklim';
+    } else {
+        ws.mergeCells('C4:C6');
+        applyHeaderStyle(ws.getCell('C4'), COLORS.white);
+        ws.getCell('C4').value = regionColumn;
 
-    ws.mergeCells('AT4:AU5');
-    applyHeaderStyle(ws.getCell('AT4'), COLORS.ringkasanKombinasi);
-    ws.getCell('AT4').value = 'Ringkasan Potensi Anomali Iklim';
+        ws.mergeCells('D4:U4');
+        applyHeaderStyle(ws.getCell('D4'), COLORS.keringDefault, true, 11);
+        ws.getCell('D4').value = 'Anomali Iklim yang Berpotensi Mengakibatkan Kondisi Lebih Kering';
+
+        ws.mergeCells('V4:X5');
+        applyHeaderStyle(ws.getCell('V4'), COLORS.keringDefault);
+        ws.getCell('V4').value = 'Ringkasan Potensi Kering';
+
+        ws.mergeCells('Y4:AP4');
+        applyHeaderStyle(ws.getCell('Y4'), COLORS.basahDefault, true, 11);
+        ws.getCell('Y4').value = 'Anomali Iklim yang Berpotensi Mengakibatkan Kondisi Lebih Basah';
+
+        ws.mergeCells('AQ4:AS5');
+        applyHeaderStyle(ws.getCell('AQ4'), COLORS.basahDefault);
+        ws.getCell('AQ4').value = 'Ringkasan Potensi Basah';
+
+        ws.mergeCells('AT4:AU5');
+        applyHeaderStyle(ws.getCell('AT4'), COLORS.ringkasanKombinasi);
+        ws.getCell('AT4').value = 'Ringkasan Potensi Anomali Iklim';
+    }
 
     // Row 5: Sub-category Headers
     ws.getRow(5).height = 20;
 
-    ws.mergeCells('D5:E5');
-    applyHeaderStyle(ws.getCell('D5'), COLORS.keringDefault);
-    ws.getCell('D5').value = 'Anomali Iklim Global';
+    if (isKecamatan) {
+        ws.mergeCells('E5:F5');
+        applyHeaderStyle(ws.getCell('E5'), COLORS.keringDefault);
+        ws.getCell('E5').value = 'Anomali Iklim Global';
 
-    ws.mergeCells('F5:L5');
-    applyHeaderStyle(ws.getCell('F5'), COLORS.keringDefault);
-    ws.getCell('F5').value = 'Monitoring Iklim Regional';
+        ws.mergeCells('G5:M5');
+        applyHeaderStyle(ws.getCell('G5'), COLORS.keringDefault);
+        ws.getCell('G5').value = 'Monitoring Iklim Regional';
 
-    ws.mergeCells('M5:U5');
-    applyHeaderStyle(ws.getCell('M5'), COLORS.keringDefault);
-    ws.getCell('M5').value = 'Prediksi Iklim Hingga Tiga Bulan Ke Depan';
+        ws.mergeCells('N5:V5');
+        applyHeaderStyle(ws.getCell('N5'), COLORS.keringDefault);
+        ws.getCell('N5').value = 'Prediksi Iklim Hingga Tiga Bulan Ke Depan';
 
-    ws.mergeCells('Y5:Z5');
-    applyHeaderStyle(ws.getCell('Y5'), COLORS.basahDefault);
-    ws.getCell('Y5').value = 'Anomali Iklim Global';
+        ws.mergeCells('Z5:AA5');
+        applyHeaderStyle(ws.getCell('Z5'), COLORS.basahDefault);
+        ws.getCell('Z5').value = 'Anomali Iklim Global';
 
-    ws.mergeCells('AA5:AG5');
-    applyHeaderStyle(ws.getCell('AA5'), COLORS.basahDefault);
-    ws.getCell('AA5').value = 'Monitoring Iklim Regional';
+        ws.mergeCells('AB5:AH5');
+        applyHeaderStyle(ws.getCell('AB5'), COLORS.basahDefault);
+        ws.getCell('AB5').value = 'Monitoring Iklim Regional';
 
-    ws.mergeCells('AH5:AP5');
-    applyHeaderStyle(ws.getCell('AH5'), COLORS.basahDefault);
-    ws.getCell('AH5').value = 'Prediksi Iklim Hingga Tiga Bulan Ke Depan';
+        ws.mergeCells('AI5:AQ5');
+        applyHeaderStyle(ws.getCell('AI5'), COLORS.basahDefault);
+        ws.getCell('AI5').value = 'Prediksi Iklim Hingga Tiga Bulan Ke Depan';
+    } else {
+        ws.mergeCells('D5:E5');
+        applyHeaderStyle(ws.getCell('D5'), COLORS.keringDefault);
+        ws.getCell('D5').value = 'Anomali Iklim Global';
+
+        ws.mergeCells('F5:L5');
+        applyHeaderStyle(ws.getCell('F5'), COLORS.keringDefault);
+        ws.getCell('F5').value = 'Monitoring Iklim Regional';
+
+        ws.mergeCells('M5:U5');
+        applyHeaderStyle(ws.getCell('M5'), COLORS.keringDefault);
+        ws.getCell('M5').value = 'Prediksi Iklim Hingga Tiga Bulan Ke Depan';
+
+        ws.mergeCells('Y5:Z5');
+        applyHeaderStyle(ws.getCell('Y5'), COLORS.basahDefault);
+        ws.getCell('Y5').value = 'Anomali Iklim Global';
+
+        ws.mergeCells('AA5:AG5');
+        applyHeaderStyle(ws.getCell('AA5'), COLORS.basahDefault);
+        ws.getCell('AA5').value = 'Monitoring Iklim Regional';
+
+        ws.mergeCells('AH5:AP5');
+        applyHeaderStyle(ws.getCell('AH5'), COLORS.basahDefault);
+        ws.getCell('AH5').value = 'Prediksi Iklim Hingga Tiga Bulan Ke Depan';
+    }
 
     // Row 6: Column Headers
     ws.getRow(6).height = 45;
 
-    const columnConfig: Record<number, { header: string; headerColor: string; dataColor: string }> = {
-        4: { header: 'El Nino', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
-        5: { header: 'IOD Positif', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
-        6: { header: 'HTH', headerColor: COLORS.hthKeringPdkm, dataColor: COLORS.hthKeringPdkm },
-        7: { header: 'Musim Kemarau', headerColor: COLORS.musimKemarau, dataColor: COLORS.white },
-        8: { header: 'Curah Hujan Bulanan Rendah', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
-        9: { header: 'Sifat Hujan Bulanan BN', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
-        10: { header: 'Curah Hujan Dasarian Rendah', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
-        11: { header: 'Sifat Hujan Dasarian BN', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
-        12: { header: 'Ada PDKM', headerColor: COLORS.hthKeringPdkm, dataColor: COLORS.hthKeringPdkm },
-        13: { header: 'El Nino Berlanjut', headerColor: COLORS.keringDefault, dataColor: COLORS.keringDefault },
-        14: { header: 'IOD+ Berlanjut', headerColor: COLORS.keringDefault, dataColor: COLORS.keringDefault },
-        15: { header: 'Bulan+1 Kemarau', headerColor: COLORS.musimKemarau, dataColor: COLORS.white },
-        16: { header: 'CH Bulan+1 Rendah', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
-        17: { header: 'SH Bulan+1 BN', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
-        18: { header: 'CH Bulan+2 Rendah', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
-        19: { header: 'SH Bulan+2 BN', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
-        20: { header: 'CH Bulan+3 Rendah', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
-        21: { header: 'SH Bulan+3 BN', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
-        22: { header: 'Total Skor', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
-        23: { header: 'Kelas', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
-        24: { header: 'Kategori', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
-        25: { header: 'La Nina', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
-        26: { header: 'IOD Negatif', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
-        27: { header: 'HTH Basah', headerColor: COLORS.hthBasahPdcht, dataColor: COLORS.hthBasahPdcht },
-        28: { header: 'Musim Hujan', headerColor: COLORS.musimHujan, dataColor: COLORS.white },
-        29: { header: 'CH Bulanan Tinggi', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
-        30: { header: 'SH Bulanan AN', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
-        31: { header: 'CH Dasarian Tinggi', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
-        32: { header: 'SH Dasarian AN', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
-        33: { header: 'Ada PDCHT', headerColor: COLORS.hthBasahPdcht, dataColor: COLORS.hthBasahPdcht },
-        34: { header: 'La Nina Berlanjut', headerColor: COLORS.basahDefault, dataColor: COLORS.basahDefault },
-        35: { header: 'IOD- Berlanjut', headerColor: COLORS.basahDefault, dataColor: COLORS.basahDefault },
-        36: { header: 'Bulan+1 Hujan', headerColor: COLORS.musimHujan, dataColor: COLORS.white },
-        37: { header: 'CH Bulan+1 Tinggi', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
-        38: { header: 'SH Bulan+1 AN', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
-        39: { header: 'CH Bulan+2 Tinggi', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
-        40: { header: 'SH Bulan+2 AN', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
-        41: { header: 'CH Bulan+3 Tinggi', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
-        42: { header: 'SH Bulan+3 AN', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
-        43: { header: 'Total Skor', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
-        44: { header: 'Kelas', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
-        45: { header: 'Kategori', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
-        46: { header: 'Kombinasi Kelas', headerColor: COLORS.ringkasanKombinasi, dataColor: COLORS.ringkasanKombinasi },
-        47: { header: 'Kategori', headerColor: COLORS.ringkasanKombinasi, dataColor: COLORS.white },
-    };
+    // Base column config for data columns (starting from column D for Kab, E for Kec)
+    const baseColumnConfig = [
+        { header: 'El Nino', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
+        { header: 'IOD Positif', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
+        { header: 'HTH', headerColor: COLORS.hthKeringPdkm, dataColor: COLORS.hthKeringPdkm },
+        { header: 'Musim Kemarau', headerColor: COLORS.musimKemarau, dataColor: COLORS.white },
+        { header: 'Curah Hujan Bulanan Rendah', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
+        { header: 'Sifat Hujan Bulanan BN', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
+        { header: 'Curah Hujan Dasarian Rendah', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
+        { header: 'Sifat Hujan Dasarian BN', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
+        { header: 'Ada PDKM', headerColor: COLORS.hthKeringPdkm, dataColor: COLORS.hthKeringPdkm },
+        { header: 'El Nino Berlanjut', headerColor: COLORS.keringDefault, dataColor: COLORS.keringDefault },
+        { header: 'IOD+ Berlanjut', headerColor: COLORS.keringDefault, dataColor: COLORS.keringDefault },
+        { header: 'Bulan+1 Kemarau', headerColor: COLORS.musimKemarau, dataColor: COLORS.white },
+        { header: 'CH Bulan+1 Rendah', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
+        { header: 'SH Bulan+1 BN', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
+        { header: 'CH Bulan+2 Rendah', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
+        { header: 'SH Bulan+2 BN', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
+        { header: 'CH Bulan+3 Rendah', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
+        { header: 'SH Bulan+3 BN', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
+        { header: 'Total Skor', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
+        { header: 'Kelas', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
+        { header: 'Kategori', headerColor: COLORS.keringDefault, dataColor: COLORS.white },
+        { header: 'La Nina', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
+        { header: 'IOD Negatif', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
+        { header: 'HTH Basah', headerColor: COLORS.hthBasahPdcht, dataColor: COLORS.hthBasahPdcht },
+        { header: 'Musim Hujan', headerColor: COLORS.musimHujan, dataColor: COLORS.white },
+        { header: 'CH Bulanan Tinggi', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
+        { header: 'SH Bulanan AN', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
+        { header: 'CH Dasarian Tinggi', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
+        { header: 'SH Dasarian AN', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
+        { header: 'Ada PDCHT', headerColor: COLORS.hthBasahPdcht, dataColor: COLORS.hthBasahPdcht },
+        { header: 'La Nina Berlanjut', headerColor: COLORS.basahDefault, dataColor: COLORS.basahDefault },
+        { header: 'IOD- Berlanjut', headerColor: COLORS.basahDefault, dataColor: COLORS.basahDefault },
+        { header: 'Bulan+1 Hujan', headerColor: COLORS.musimHujan, dataColor: COLORS.white },
+        { header: 'CH Bulan+1 Tinggi', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
+        { header: 'SH Bulan+1 AN', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
+        { header: 'CH Bulan+2 Tinggi', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
+        { header: 'SH Bulan+2 AN', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
+        { header: 'CH Bulan+3 Tinggi', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
+        { header: 'SH Bulan+3 AN', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
+        { header: 'Total Skor', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
+        { header: 'Kelas', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
+        { header: 'Kategori', headerColor: COLORS.basahDefault, dataColor: COLORS.white },
+        { header: 'Kombinasi Kelas', headerColor: COLORS.ringkasanKombinasi, dataColor: COLORS.ringkasanKombinasi },
+        { header: 'Kategori', headerColor: COLORS.ringkasanKombinasi, dataColor: COLORS.white },
+    ];
 
-    Object.entries(columnConfig).forEach(([colIdx, config]) => {
-        const col = parseInt(colIdx);
+    const startCol = isKecamatan ? 5 : 4; // Start from column E for Kecamatan, D for Kabupaten
+    baseColumnConfig.forEach((config, idx) => {
+        const col = startCol + idx;
         const cell = ws.getCell(6, col);
         cell.value = config.header;
         applyHeaderStyle(cell, config.headerColor);
+    });
+    
+    // Create columnConfig mapping for data rows
+    const columnConfig: Record<number, { header: string; headerColor: string; dataColor: string }> = {};
+    baseColumnConfig.forEach((config, idx) => {
+        columnConfig[startCol + idx] = config;
     });
 
     // Data rows
@@ -389,8 +465,17 @@ const createWorkbook = async (
         const excelRow = ws.getRow(rowNum);
         excelRow.height = 18;
 
-        const values = [
-            idx + 1, 'DIY', row.name,
+        const baseValues = [
+            idx + 1, 'DIY'
+        ];
+        
+        if (isKecamatan) {
+            baseValues.push(row.kabupaten); // Add Kabupaten column for Kecamatan
+        }
+        
+        baseValues.push(row.name); // Kab or Kec name
+        
+        const dataValues = [
             row.kering.elNino, row.kering.iodPositif, row.kering.hthKering, row.kering.musimKemarau,
             row.kering.chBulananRendah, row.kering.shBulananBN, row.kering.chDasarianRendah, row.kering.shDasarianBN,
             row.kering.pdkm, row.kering.elNinoBerlanjut, row.kering.iodPositifBerlanjut, row.kering.bulanPlus1Kemarau,
@@ -406,6 +491,8 @@ const createWorkbook = async (
             row.combinedKelas, row.combinedKategori,
         ];
 
+        const values = [...baseValues, ...dataValues];
+
         values.forEach((value, colIdx) => {
             const col = colIdx + 1;
             const cell = ws.getCell(rowNum, col);
@@ -419,19 +506,28 @@ const createWorkbook = async (
     // ========== SHEET 2: RINGKASAN ==========
     const wsRingkasan = workbook.addWorksheet('Ringkasan');
 
-    wsRingkasan.columns = [
+    const ringkasanColumns = [
         { width: 4 },   // A: No
         { width: 8 },   // B: Provinsi
-        { width: 18 },  // C: Kabupaten/Kecamatan
-        { width: 8 },   // D: Skor Kering
-        { width: 8 },   // E: Kelas Kering
-        { width: 12 },  // F: Kategori Kering
-        { width: 8 },   // G: Skor Basah
-        { width: 8 },   // H: Kelas Basah
-        { width: 12 },  // I: Kategori Basah
-        { width: 14 }, // J: Kombinasi Kelas
-        { width: 12 },  // K: Kategori
     ];
+    
+    if (isKecamatan) {
+        ringkasanColumns.push({ width: 18 }); // C: Kabupaten (only for Kecamatan)
+    }
+    
+    ringkasanColumns.push(
+        { width: 18 },  // C or D: Kabupaten/Kecamatan
+        { width: 8 },   // D or E: Skor Kering
+        { width: 8 },   // E or F: Kelas Kering
+        { width: 12 },  // F or G: Kategori Kering
+        { width: 8 },   // G or H: Skor Basah
+        { width: 8 },   // H or I: Kelas Basah
+        { width: 12 },  // I or J: Kategori Basah
+        { width: 14 },  // J or K: Kombinasi Kelas
+        { width: 12 },  // K or L: Kategori
+    );
+
+    wsRingkasan.columns = ringkasanColumns;
 
     const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
         'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -440,14 +536,16 @@ const createWorkbook = async (
 
     // Row 1: Main Title
     wsRingkasan.getRow(1).height = 20;
-    wsRingkasan.mergeCells('A1:K1');
+    const ringkasanTitleMerge = isKecamatan ? 'A1:L1' : 'A1:K1';
+    wsRingkasan.mergeCells(ringkasanTitleMerge);
     const ringkasanTitle = wsRingkasan.getCell('A1');
     ringkasanTitle.value = `Ringkasan Identifikasi Anomali Iklim - Level ${levelName}`;
     ringkasanTitle.font = { name: 'Calibri', bold: true, size: 12 };
     ringkasanTitle.alignment = { horizontal: 'center', vertical: 'middle' };
 
     // Row 2: Update date
-    wsRingkasan.mergeCells('A2:K2');
+    const ringkasanDateMerge = isKecamatan ? 'A2:L2' : 'A2:K2';
+    wsRingkasan.mergeCells(ringkasanDateMerge);
     const updateDate = wsRingkasan.getCell('A2');
     updateDate.value = `Update ${currentMonth} ${currentYear}`;
     updateDate.font = { name: 'Calibri', bold: true, size: 11 };
@@ -461,47 +559,91 @@ const createWorkbook = async (
 
     wsRingkasan.mergeCells('A4:A5');
     wsRingkasan.mergeCells('B4:B5');
-    wsRingkasan.mergeCells('C4:C5');
     applyHeaderStyle(wsRingkasan.getCell('A4'), COLORS.white);
     applyHeaderStyle(wsRingkasan.getCell('B4'), COLORS.white);
-    applyHeaderStyle(wsRingkasan.getCell('C4'), COLORS.white);
     wsRingkasan.getCell('A4').value = 'No';
     wsRingkasan.getCell('B4').value = 'Provinsi';
-    wsRingkasan.getCell('C4').value = regionColumn;
+    
+    if (isKecamatan) {
+        wsRingkasan.mergeCells('C4:C5');
+        applyHeaderStyle(wsRingkasan.getCell('C4'), COLORS.white);
+        wsRingkasan.getCell('C4').value = 'Kab';
+        
+        wsRingkasan.mergeCells('D4:D5');
+        applyHeaderStyle(wsRingkasan.getCell('D4'), COLORS.white);
+        wsRingkasan.getCell('D4').value = regionColumn;
 
-    wsRingkasan.mergeCells('D4:F4');
-    applyHeaderStyle(wsRingkasan.getCell('D4'), COLORS.keringDefault);
-    wsRingkasan.getCell('D4').value = 'Ringkasan Potensi Kering';
+        wsRingkasan.mergeCells('E4:G4');
+        applyHeaderStyle(wsRingkasan.getCell('E4'), COLORS.keringDefault);
+        wsRingkasan.getCell('E4').value = 'Ringkasan Potensi Kering';
 
-    wsRingkasan.mergeCells('G4:I4');
-    applyHeaderStyle(wsRingkasan.getCell('G4'), COLORS.basahDefault);
-    wsRingkasan.getCell('G4').value = 'Ringkasan Potensi Basah';
+        wsRingkasan.mergeCells('H4:J4');
+        applyHeaderStyle(wsRingkasan.getCell('H4'), COLORS.basahDefault);
+        wsRingkasan.getCell('H4').value = 'Ringkasan Potensi Basah';
 
-    wsRingkasan.mergeCells('J4:K4');
-    applyHeaderStyle(wsRingkasan.getCell('J4'), COLORS.ringkasanKombinasi);
-    wsRingkasan.getCell('J4').value = 'Ringkasan Kondisi Iklim';
+        wsRingkasan.mergeCells('K4:L4');
+        applyHeaderStyle(wsRingkasan.getCell('K4'), COLORS.ringkasanKombinasi);
+        wsRingkasan.getCell('K4').value = 'Ringkasan Kondisi Iklim';
+    } else {
+        wsRingkasan.mergeCells('C4:C5');
+        applyHeaderStyle(wsRingkasan.getCell('C4'), COLORS.white);
+        wsRingkasan.getCell('C4').value = regionColumn;
+
+        wsRingkasan.mergeCells('D4:F4');
+        applyHeaderStyle(wsRingkasan.getCell('D4'), COLORS.keringDefault);
+        wsRingkasan.getCell('D4').value = 'Ringkasan Potensi Kering';
+
+        wsRingkasan.mergeCells('G4:I4');
+        applyHeaderStyle(wsRingkasan.getCell('G4'), COLORS.basahDefault);
+        wsRingkasan.getCell('G4').value = 'Ringkasan Potensi Basah';
+
+        wsRingkasan.mergeCells('J4:K4');
+        applyHeaderStyle(wsRingkasan.getCell('J4'), COLORS.ringkasanKombinasi);
+        wsRingkasan.getCell('J4').value = 'Ringkasan Kondisi Iklim';
+    }
 
     // Row 5: Sub-headers
     wsRingkasan.getRow(5).height = 20;
 
-    applyHeaderStyle(wsRingkasan.getCell('D5'), COLORS.keringDefault);
-    wsRingkasan.getCell('D5').value = 'Skor';
-    applyHeaderStyle(wsRingkasan.getCell('E5'), COLORS.keringDefault);
-    wsRingkasan.getCell('E5').value = 'Kelas';
-    applyHeaderStyle(wsRingkasan.getCell('F5'), COLORS.keringDefault);
-    wsRingkasan.getCell('F5').value = 'Kategori';
+    if (isKecamatan) {
+        applyHeaderStyle(wsRingkasan.getCell('E5'), COLORS.keringDefault);
+        wsRingkasan.getCell('E5').value = 'Skor';
+        applyHeaderStyle(wsRingkasan.getCell('F5'), COLORS.keringDefault);
+        wsRingkasan.getCell('F5').value = 'Kelas';
+        applyHeaderStyle(wsRingkasan.getCell('G5'), COLORS.keringDefault);
+        wsRingkasan.getCell('G5').value = 'Kategori';
 
-    applyHeaderStyle(wsRingkasan.getCell('G5'), COLORS.basahDefault);
-    wsRingkasan.getCell('G5').value = 'Skor';
-    applyHeaderStyle(wsRingkasan.getCell('H5'), COLORS.basahDefault);
-    wsRingkasan.getCell('H5').value = 'Kelas';
-    applyHeaderStyle(wsRingkasan.getCell('I5'), COLORS.basahDefault);
-    wsRingkasan.getCell('I5').value = 'Kategori';
+        applyHeaderStyle(wsRingkasan.getCell('H5'), COLORS.basahDefault);
+        wsRingkasan.getCell('H5').value = 'Skor';
+        applyHeaderStyle(wsRingkasan.getCell('I5'), COLORS.basahDefault);
+        wsRingkasan.getCell('I5').value = 'Kelas';
+        applyHeaderStyle(wsRingkasan.getCell('J5'), COLORS.basahDefault);
+        wsRingkasan.getCell('J5').value = 'Kategori';
 
-    applyHeaderStyle(wsRingkasan.getCell('J5'), COLORS.ringkasanKombinasi);
-    wsRingkasan.getCell('J5').value = 'Kombinasi Kelas';
-    applyHeaderStyle(wsRingkasan.getCell('K5'), COLORS.ringkasanKombinasi);
-    wsRingkasan.getCell('K5').value = 'Kategori';
+        applyHeaderStyle(wsRingkasan.getCell('K5'), COLORS.ringkasanKombinasi);
+        wsRingkasan.getCell('K5').value = 'Kombinasi Kelas';
+        applyHeaderStyle(wsRingkasan.getCell('L5'), COLORS.ringkasanKombinasi);
+        wsRingkasan.getCell('L5').value = 'Kategori';
+    } else {
+        applyHeaderStyle(wsRingkasan.getCell('D5'), COLORS.keringDefault);
+        wsRingkasan.getCell('D5').value = 'Skor';
+        applyHeaderStyle(wsRingkasan.getCell('E5'), COLORS.keringDefault);
+        wsRingkasan.getCell('E5').value = 'Kelas';
+        applyHeaderStyle(wsRingkasan.getCell('F5'), COLORS.keringDefault);
+        wsRingkasan.getCell('F5').value = 'Kategori';
+
+        applyHeaderStyle(wsRingkasan.getCell('G5'), COLORS.basahDefault);
+        wsRingkasan.getCell('G5').value = 'Skor';
+        applyHeaderStyle(wsRingkasan.getCell('H5'), COLORS.basahDefault);
+        wsRingkasan.getCell('H5').value = 'Kelas';
+        applyHeaderStyle(wsRingkasan.getCell('I5'), COLORS.basahDefault);
+        wsRingkasan.getCell('I5').value = 'Kategori';
+
+        applyHeaderStyle(wsRingkasan.getCell('J5'), COLORS.ringkasanKombinasi);
+        wsRingkasan.getCell('J5').value = 'Kombinasi Kelas';
+        applyHeaderStyle(wsRingkasan.getCell('K5'), COLORS.ringkasanKombinasi);
+        wsRingkasan.getCell('K5').value = 'Kategori';
+    }
 
     // Data rows for Ringkasan
     allData.forEach((row, idx) => {
@@ -510,19 +652,29 @@ const createWorkbook = async (
         const excelRow = wsRingkasan.getRow(rowNum);
         excelRow.height = 18;
 
-        const values = [
+        const baseRingkasanValues = [
             idx + 1,           // A: No
             'DIY',             // B: Provinsi
-            row.name,          // C: Kab/Kec
-            row.keringTotal,   // D: Skor Kering
-            row.keringKelas,   // E: Kelas Kering
-            row.keringKategori, // F: Kategori Kering
-            row.basahTotal,    // G: Skor Basah
-            row.basahKelas,    // H: Kelas Basah
-            row.basahKategori, // I: Kategori Basah
-            row.combinedKelas, // J: Kombinasi Kelas
-            row.combinedKategori, // K: Kategori
         ];
+        
+        if (isKecamatan) {
+            baseRingkasanValues.push(row.kabupaten); // C: Kabupaten (only for Kecamatan)
+        }
+        
+        baseRingkasanValues.push(row.name); // C or D: Kab/Kec
+        
+        const ringkasanDataValues = [
+            row.keringTotal,      // Skor Kering
+            row.keringKelas,      // Kelas Kering
+            row.keringKategori,   // Kategori Kering
+            row.basahTotal,       // Skor Basah
+            row.basahKelas,       // Kelas Basah
+            row.basahKategori,    // Kategori Basah
+            row.combinedKelas,    // Kombinasi Kelas
+            row.combinedKategori, // Kategori
+        ];
+
+        const values = [...baseRingkasanValues, ...ringkasanDataValues];
 
         values.forEach((value, colIdx) => {
             const col = colIdx + 1;
@@ -596,14 +748,14 @@ export const exportCombinedToExcel = async () => {
 
     // Collect Kabupaten data
     const kabupatenData = KABUPATEN_LIST.map(kab => collectKabupatenData(state, kab)).filter(Boolean);
-    const wbKabupaten = await createWorkbook(kabupatenData, 'Kabupaten', 'Kab');
+    const wbKabupaten = await createWorkbook(kabupatenData, 'Kabupaten', 'Kab', false);
     const bufferKab = await wbKabupaten.xlsx.writeBuffer();
     const blobKab = new Blob([bufferKab], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     saveAs(blobKab, `SKPG_Kabupaten_${timestamp}.xlsx`);
 
     // Collect Kecamatan data
     const kecamatanData = KECAMATAN_LIST.map(kec => collectKecamatanData(state, kec)).filter(Boolean);
-    const wbKecamatan = await createWorkbook(kecamatanData, 'Kecamatan', 'Kec');
+    const wbKecamatan = await createWorkbook(kecamatanData, 'Kecamatan', 'Kec', true);
     const bufferKec = await wbKecamatan.xlsx.writeBuffer();
     const blobKec = new Blob([bufferKec], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     saveAs(blobKec, `SKPG_Kecamatan_${timestamp}.xlsx`);

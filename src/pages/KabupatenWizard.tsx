@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Stepper, Step } from '@/components/Stepper';
-import { useWizardStore } from '@/store/wizardStore';
+import { useWizardStore, KABUPATEN_LIST } from '@/store/wizardStore';
 import { StepGlobalAnomaliesDry } from '@/components/wizard/StepGlobalAnomaliesDry';
 import { StepGlobalAnomaliesWet } from '@/components/wizard/StepGlobalAnomaliesWet';
 import { StepSeasonToggles } from '@/components/wizard/StepSeasonToggles';
@@ -49,7 +49,6 @@ const KabupatenWizard: React.FC = () => {
 
   // Validasi untuk setiap step
   const validateStep = (step: number): { isValid: boolean; message?: string } => {
-    const KABUPATEN_LIST = ['Sleman', 'Bantul', 'Kota Yogyakarta', 'Kulon Progo', 'Gunungkidul'];
     const visitedKab = visitedKabupatenPerStep[step] || [];
     
     // Steps yang membutuhkan kunjungan semua kabupaten (input manual per kabupaten)
