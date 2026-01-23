@@ -849,8 +849,8 @@ export const StepCombinedCHSH: React.FC<StepCombinedCHSHProps> = ({ period, titl
                   <Select value={selectedMetric} onValueChange={(v) => setSelectedMetric(v as MetricType)}>
                     <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="ach">ACH</SelectItem>
-                      <SelectItem value="ash">ASH</SelectItem>
+                      <SelectItem value="ach">{period === 'plus1' || period === 'plus2' || period === 'plus3' ? 'PCH' : 'ACH'}</SelectItem>
+                      <SelectItem value="ash">{period === 'plus1' || period === 'plus2' || period === 'plus3' ? 'PSH' : 'ASH'}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

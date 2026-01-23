@@ -202,7 +202,7 @@ const CombinedWizard: React.FC = () => {
         return (
           <StepCombinedCHSH
             period="dasarian"
-            title="CH/SH Dasarian (Bulan Berjalan)"
+            title="Analisis CH/SH Dasarian (Bulan Berjalan)"
             description="Upload data CH dan SH dasarian untuk bulan berjalan"
           />
         );
