@@ -33,8 +33,7 @@ export const StepGlobalAnomaliesDryKec: React.FC = () => {
           <CardHeader>
             <CardTitle>El Niño</CardTitle>
             <CardDescription>
-              Fenomena pemanasan suhu permukaan laut di Pasifik Tengah dan Timur yang dapat menyebabkan penurunan curah hujan di Indonesia
-            </CardDescription>
+              Jika anomali suhu permukaan laut wilayah Pasifik Tengah Ekuator positif (lebih panas dari rata-ratanya)            </CardDescription>
           </CardHeader>
           <CardContent>
             <SegmentedControl
@@ -49,7 +48,7 @@ export const StepGlobalAnomaliesDryKec: React.FC = () => {
           <CardHeader>
             <CardTitle>IOD Positif</CardTitle>
             <CardDescription>
-              Indian Ocean Dipole fase positif yang umumnya menyebabkan kondisi lebih kering di sebagian wilayah Indonesia
+              Indian Ocean Dipole positif berdampak pada berkurangnya curah hujan di Indonesia terutama di bagian barat.
             </CardDescription>
           </CardHeader>
           <CardContent>

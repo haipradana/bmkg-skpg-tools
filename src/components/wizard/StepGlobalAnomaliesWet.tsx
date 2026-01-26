@@ -28,8 +28,7 @@ export const StepGlobalAnomaliesWet: React.FC = () => {
           <CardHeader>
             <CardTitle>La Niña</CardTitle>
             <CardDescription>
-              Fenomena pendinginan suhu permukaan laut di Pasifik Tengah dan Timur yang dapat menyebabkan peningkatan curah hujan di Indonesia
-            </CardDescription>
+              Jika anomali suhu permukaan laut negatif (lebih dingin dari rata - ratanya).            </CardDescription>
           </CardHeader>
           <CardContent>
             <SegmentedControl
@@ -44,7 +43,7 @@ export const StepGlobalAnomaliesWet: React.FC = () => {
           <CardHeader>
             <CardTitle>IOD Negatif</CardTitle>
             <CardDescription>
-              Indian Ocean Dipole fase negatif yang umumnya menyebabkan kondisi lebih basah di sebagian wilayah Indonesia
+              Indian Ocean Dipole Negatif berdampak terhadap peningkatan curah  hujan di Indonesia bagian barat. 
             </CardDescription>
           </CardHeader>
           <CardContent>
