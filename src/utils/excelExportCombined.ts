@@ -142,6 +142,11 @@ const collectKecamatanData = (state: any, kec: string) => {
     const kecData = state.kecamatanData[kec];
     if (!kecData) return null;
 
+    // Get kabupaten name from kecamatan key (e.g., "Sleman_Gamping" -> "Sleman")
+    const kabName = kec.split('_')[0];
+    // Get PDKM data from parent kabupaten
+    const kabPdkmData = state.kabupatenData[kabName]?.pdkm || { pdkm: 0, pdcht: 0 };
+
     const keringData = {
         elNino: kecData.globalAnomaliesDry?.elNino || 0,
         iodPositif: kecData.globalAnomaliesDry?.iodPositif || 0,
@@ -151,7 +156,7 @@ const collectKecamatanData = (state: any, kec: string) => {
         shBulananBN: state.chshMonthly.resultsKecamatan?.[kec]?.sh_bulanan_BN || 0,
         chDasarianRendah: state.chshDasarian.resultsKecamatan?.[kec]?.ch_bulanan_rendah || 0,
         shDasarianBN: state.chshDasarian.resultsKecamatan?.[kec]?.sh_bulanan_BN || 0,
-        pdkm: kecData.pdkm?.pdkm || 0,
+        pdkm: kabPdkmData.pdkm || 0,
         elNinoBerlanjut: kecData.globalAnomaliesDry?.elNinoBerlanjut || 0,
         iodPositifBerlanjut: kecData.globalAnomaliesDry?.iodPositifBerlanjut || 0,
         bulanPlus1Kemarau: kecData.seasonToggles?.bulanPlus1MusimKemarau || 0,
@@ -172,7 +177,7 @@ const collectKecamatanData = (state: any, kec: string) => {
         shBulananAN: state.chshMonthly.resultsKecamatan?.[kec]?.sh_bulanan_AN || 0,
         chDasarianTinggi: state.chshDasarian.resultsKecamatan?.[kec]?.ch_bulanan_tinggi || 0,
         shDasarianAN: state.chshDasarian.resultsKecamatan?.[kec]?.sh_bulanan_AN || 0,
-        pdcht: kecData.pdkm?.pdcht || 0,
+        pdcht: kabPdkmData.pdcht || 0,
         laNinaBerlanjut: kecData.globalAnomaliesWet?.laNinaBerlanjut || 0,
         iodNegatifBerlanjut: kecData.globalAnomaliesWet?.iodNegatifBerlanjut || 0,
         bulanPlus1Hujan: kecData.seasonToggles?.bulanPlus1MusimHujan || 0,
@@ -190,7 +195,6 @@ const collectKecamatanData = (state: any, kec: string) => {
     const basahClass = getBasahClassification(basahTotal);
     const combinedClass = getCombinedClassification(keringClass.kelas, basahClass.kelas);
 
-    const kabName = kec.split('_')[0];
     const kecName = getKecamatanFromKey(kec);
 
     return {

@@ -10,7 +10,7 @@ import { StepDualAnomaliesWet } from '@/components/combined/StepDualAnomaliesWet
 import { StepDualSeasonToggles } from '@/components/combined/StepDualSeasonToggles';
 import { StepCombinedHTH } from '@/components/combined/StepCombinedHTH';
 import { StepCombinedCHSH } from '@/components/combined/StepCombinedCHSH';
-import { StepPDKM } from '@/components/wizard/StepPDKM';
+import { StepCombinedPDKM } from '@/components/combined/StepCombinedPDKM';
 import { StepCombinedSummary } from '@/components/combined/StepCombinedSummary';
 import { ChevronLeft, ChevronRight, RotateCcw, Layers } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -54,14 +54,62 @@ const CombinedWizard: React.FC = () => {
 
   // Validasi untuk setiap step
   const validateStep = (step: number): { isValid: boolean; message?: string } => {
-    // Steps 0-2: Kabupaten-only input (kecamatan auto-filled from kabupaten)
-    // No validation needed - all kabupaten cards are visible and input is applied automatically
-    if (step <= 2) {
-      return { isValid: true };
+    const visitedKab = visitedKabupatenPerStep[step] || [];
+    
+    // Steps yang membutuhkan kunjungan semua kabupaten (input manual per kabupaten dengan cards)
+    // Step 9 (PDKM) tidak termasuk karena menggunakan layout list, bukan cards
+    const stepsRequiringAllKabupaten = [0, 1, 2];
+    
+    // Cek apakah semua kabupaten sudah dikunjungi untuk step yang membutuhkan
+    if (stepsRequiringAllKabupaten.includes(step)) {
+      const allVisited = KABUPATEN_LIST.every(kab => visitedKab.includes(kab));
+      if (!allVisited) {
+        const notVisited = KABUPATEN_LIST.filter(kab => !visitedKab.includes(kab));
+        return {
+          isValid: false,
+          message: `Belum semua kabupaten dikunjungi. Silakan klik kabupaten berikut: ${notVisited.join(', ')}`
+        };
+      }
     }
     
     // Existing validation for other steps
     switch (step) {
+      case 0: // Anomali Kering
+        const hasAllKabDry = KABUPATEN_LIST.every(kab => 
+          kabupatenData[kab]?.globalAnomaliesDry !== undefined
+        );
+        if (!hasAllKabDry) {
+          return { 
+            isValid: false, 
+            message: 'Silakan isi data Anomali Kering untuk semua kabupaten' 
+          };
+        }
+        return { isValid: true };
+        
+      case 1: // Anomali Basah
+        const hasAllKabWet = KABUPATEN_LIST.every(kab => 
+          kabupatenData[kab]?.globalAnomaliesWet !== undefined
+        );
+        if (!hasAllKabWet) {
+          return { 
+            isValid: false, 
+            message: 'Silakan isi data Anomali Basah untuk semua kabupaten' 
+          };
+        }
+        return { isValid: true };
+        
+      case 2: // Musim
+        const hasAllKabSeason = KABUPATEN_LIST.every(kab => 
+          kabupatenData[kab]?.seasonToggles !== undefined
+        );
+        if (!hasAllKabSeason) {
+          return { 
+            isValid: false, 
+            message: 'Silakan isi data Musim untuk semua kabupaten' 
+          };
+        }
+        return { isValid: true };
+        
       case 3: // HTH
         if (!hthData.resultsKabupaten || !hthData.resultsKecamatan) {
           return { 
@@ -231,8 +279,7 @@ const CombinedWizard: React.FC = () => {
           />
         );
       case 9:
-        // TODO: Create StepCombinedPDKM
-        return <StepPDKM />;
+        return <StepCombinedPDKM />;
       case 10:
         return <StepCombinedSummary />;
       default:
